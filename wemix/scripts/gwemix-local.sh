@@ -101,7 +101,7 @@ function init_gov ()
     PORT=$(grep PORT "${d}/.rc" | sed -e 's/PORT=//')
     [ "$PORT" = "" ] && PORT=8588
 
-    exec ${GWEMIX} attach http://localhost:"${PORT}" --preload "$d/conf/WemixGovernance.js,$d/conf/deploy-governance.js" --exec 'GovernanceDeployer.deploy("'"${ACCT}"'", "'"${PASSWORD}"'", "'"${CONFIG}"'", '${INIT_ONCE}')'
+    exec ${GWEMIX} attach http://localhost:"${PORT}" --preload "$d/conf/WemixGovernance.js,$d/conf/deploy-governance-local.js" --exec 'GovernanceDeployer.deploy("'"${ACCT}"'", "'"${PASSWORD}"'", "'"${CONFIG}"'", '${INIT_ONCE}')'
 }
 
 function wipe ()

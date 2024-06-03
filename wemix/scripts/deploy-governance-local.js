@@ -141,6 +141,7 @@ var GovernanceDeployer = new function() {
             gasPrice: this.gasPrice,
             nonce: this.nonce(0)
         }
+
         var stx = offlineWalletSignTx(this.wallet[0].id, tx, eth.chainId())
         return eth.sendRawTransaction(stx)
     }
@@ -183,11 +184,11 @@ var GovernanceDeployer = new function() {
         throw "Cannot get a transaction receipt for " + tx
     }
 
-    this.sendStakingDeposit = function (idx, to, data, stake) {
-        var tx = { from: this.wallet[i].address, to: to, gas: this.gas, gasPrice: this.gasPrice, nonce: this.nonce(idx), value: "0" }
+    this.sendStakingDeposit = function (wallet, to, data, stake) {
+        var tx = { from: wallet.address, to: to, gas: this.gas, gasPrice: this.gasPrice, nonce: this.nonce(idx), value: "0" }
         tx.value = stake
         if (data) tx.data = data
-        var stx = offlineWalletSignTx(this.wallet[idx].id, tx, eth.chainId())
+        var stx = offlineWalletSignTx(wallet.id, tx, eth.chainId())
 
         return eth.sendRawTransaction(stx)
     }
@@ -203,11 +204,11 @@ var GovernanceDeployer = new function() {
         this.verifyCfg(data)
 
         for (var i = 0; i < data.members.length; i++) {
-            w = offlineWalletOpen(walletUrl + "account" + i, password)
+            w = offlineWalletOpen(walletUrl + "account" + (i+1), password)
             if (!w || !w.id || !w.address) {
                 throw "Offline wallet is not loaded"
             }
-            if (!("0x" + this.wallet[i].address == data.members[i].address)) {
+            if (!(w.address == data.members[i].addr)) {
                 throw "invalid address"
             }
             this.wallet[i] = w
@@ -360,7 +361,7 @@ var GovernanceDeployer = new function() {
         code = tmpStakingImp.init.getData(registry.address,
             doInitOnce ? initData.stakes : "", {data: Staking_data})
         txs[txs.length] = this.sendTx(staking.address, null, code);
-        for (var i = 1; i < this.wallet.length; i++) {
+        for (var i = i; i < this.wallet.length; i++) {
             var d = tmpStakingImp.balanceOf.getData(this.wallet[i].address)
             txs[txs.length] = this.sendStakingDeposit(this.wallet[i], this.nonce(i), staking.address, tmpStakingImp.deposit.getData(), web3.toBigNumber(bootNode.stake).toString(10));
         }

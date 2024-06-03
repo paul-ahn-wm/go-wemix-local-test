@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# 해당 경로에 실행 중인 프로세스 ID (PID)를 찾아서 종료
+pid=$(pgrep -f "gwemix")
+
+if [ -n "$pid" ]; then
+    kill -9 "$pid"
+fi
+
 # 필수 인수 확인
 if [ "$#" -ne 4 ]; then
   echo "Usage: $0 -a <account_num> -f <output_config_file>"
@@ -87,4 +94,23 @@ done
 echo "$json_content" >"$OUTPUT_CONFIG_FILE"
 echo "Updated config saved to $OUTPUT_CONFIG_FILE"
 
+mkdir geth
+mkdir keystore
+chmod 0700 keystore
+cp account1 keystore/
+cp nodekey1 geth/nodekey
+
 bin/gwemix-local.sh init "" "$OUTPUT_CONFIG_FILE"
+bin/gwemix-local.sh start
+
+wait_for_port() {
+    local port="8588"
+    while ! nc -z localhost "$port"; do
+        sleep 1
+    done
+}
+
+# 포트가 열릴 때까지 기다림
+wait_for_port 8588
+
+bin/gwemix-local.sh init-gov "" conf/config.json "" test
