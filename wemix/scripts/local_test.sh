@@ -28,7 +28,7 @@ if [ -z "$ACCOUNT_NUM" ] || [ -z "$OUTPUT_CONFIG_FILE" ]; then
 fi
 
 # 초기화
-echo '{"members":[]}' >"$OUTPUT_CONFIG_FILE"
+echo '{"members":[], "accounts":[]}' >"$OUTPUT_CONFIG_FILE"
 
 # 파일을 JSON 형식으로 로드
 json_content=$(cat "$OUTPUT_CONFIG_FILE")
@@ -66,14 +66,16 @@ for ((i = 1; i <= ACCOUNT_NUM; i++)); do
   ids=$(gwemix wemix nodeid nodekey$i)
   idv5=$(echo "$ids" | awk '/idv5:/ {print $2}')
   idv5="0x$idv5"
+  ip="172.16.237.1$i"
 
   # account1 파일에서 address 필드 값 추출
   address=$(jq -r '.address' "account$i")
   address="0x$address"
   name="localtest$i"
 
-  json_content=$(echo "$json_content" | jq --arg addr "$address" --arg name "$name" --arg id "$idv5" --argjson index $((i - 1)) \
-    '.members += [{"addr": $addr, "stake": 1500000000000000000000000, "name": $name, "id": $id, "port": 8589, "bootnode": false}]')
+  json_content=$(echo "$json_content" | jq --arg addr "$address" --arg name "$name" --arg id "$idv5" --arg ip "$ip" --argjson index $((i - 1)) \
+    '.members += [{"addr": $addr, "stake": 1500000000000000000000000, "name": $name, "id": $id, "ip": $ip, "port": 8589, "bootnode": false}] 
+    | .accounts += [{"addr": $addr, "balance": 2000000000000000000000000}]')
 
   if [ $i -eq 1 ]; then
     json_content=$(echo "$json_content" | jq --arg addr "$address" \
@@ -84,3 +86,5 @@ done
 # 수정된 내용을 파일에 저장
 echo "$json_content" >"$OUTPUT_CONFIG_FILE"
 echo "Updated config saved to $OUTPUT_CONFIG_FILE"
+
+bin/gwemix-local.sh init "" "$OUTPUT_CONFIG_FILE"
