@@ -64,7 +64,7 @@ for ((i = 1; i <= ACCOUNT_NUM; i++)); do
   if [ -f "account$i" ]; then
     rm account$i
   fi
-  gwemix wemix new-account --out account$i
+  yes "test" | head -n 2 | gwemix wemix new-account --out account$i
   
   if [ -f "nodekey$i" ]; then
     rm nodekey$i
