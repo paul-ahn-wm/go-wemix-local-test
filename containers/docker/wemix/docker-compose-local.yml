@@ -1,0 +1,87 @@
+services:
+  wemix-boot:
+    build:
+      context: .
+      dockerfile: Dockerfile.local.boot
+      args:
+        REPO: https://github.com/wemixarchive/go-wemix.git
+        BRANCH: master
+        NODE_NUM: 1
+    image: wemix/node-boot:latest
+    hostname: wemix-boot
+    networks:
+      wemix-dev-bridge:
+        ipv4_address: 172.16.237.11
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 8588:8588
+      - 8589:8589
+      - 8598:8598
+    container_name: wemix-boot
+  wemix-node1:
+    build:
+      context: .
+      dockerfile: Dockerfile.local.node
+      args:
+        REPO: https://github.com/wemixarchive/go-wemix.git
+        BRANCH: master
+        NODE_NUM: 2
+    image: wemix/node:latest
+    hostname: wemix-node1
+    networks:
+      wemix-dev-bridge:
+        ipv4_address: 172.16.237.12
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      wemix1-dev:
+        condition: service_started
+    container_name: wemix-node1
+  wemix-node2:
+    build:
+      context: .
+      dockerfile: Dockerfile.local.node
+      args:
+        REPO: https://github.com/wemixarchive/go-wemix.git
+        BRANCH: master
+        NODE_NUM: 3
+    image: wemix/node:latest
+    hostname: wemix-node2
+    networks:
+      wemix-dev-bridge:
+        ipv4_address: 172.16.237.13
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      wemix1-dev:
+        condition: service_started
+    container_name: wemix-node2
+  wemix-node3:
+    build:
+      context: .
+      dockerfile: Dockerfile.local.node
+      args:
+        REPO: https://github.com/wemixarchive/go-wemix.git
+        BRANCH: master
+        NODE_NUM: 4
+    image: wemix/node:latest
+    hostname: wemix-node3
+    networks:
+      wemix-dev-bridge:
+        ipv4_address: 172.16.237.14
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      wemix1-dev:
+        condition: service_started
+    container_name: wemix-node3
+
+networks:
+  wemix-dev-bridge:
+    name: wemix-dev-bridge
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.237.0/24
