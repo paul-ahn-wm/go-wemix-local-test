@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # 필수 인수 확인
-if [ "$#" -ne 4 ]; then
-  echo "Usage: $0 -a <account_num> -f <output_config_file>"
+if [ "$#" -ne 8 ]; then
+  echo "Usage: $0 -a <account_num> -f <output_config_file> -b <branch> -r <repo>"
   exit 1
 fi
 
 # 옵션 파싱
-while getopts "a:f:" opt; do
+while getopts "a:f:b:r:" opt; do
   case ${opt} in
   a)
     ACCOUNT_NUM=$OPTARG
@@ -15,15 +15,21 @@ while getopts "a:f:" opt; do
   f)
     OUTPUT_CONFIG_FILE=$OPTARG
     ;;
+  b)
+    BRANCH=$OPTARG
+    ;;
+  r)
+    REPO=$OPTARG
+    ;;
   \?)
-    echo "Usage: $0 -a <account_num> -f <output_config_file>"
+    echo "Usage: $0 -a <account_num> -f <output_config_file> -b <branch> -r <repo>"
     exit 1
     ;;
   esac
 done
 
 # 필수 인수 확인
-if [ -z "$ACCOUNT_NUM" ] || [ -z "$OUTPUT_CONFIG_FILE" ]; then
+if [ -z "$ACCOUNT_NUM" ] || [ -z "$OUTPUT_CONFIG_FILE" ] || [ -z "$BRANCH" ] || [ -z "$REPO" ]; then
   exit 1
 fi
 
@@ -60,16 +66,12 @@ for ((i = 1; i <= ACCOUNT_NUM; i++)); do
   if [ -f "account$i" ]; then
     rm account$i
   fi
-  yes "test" | head -n 2 | gwemix wemix new-account --out account$i
-
-  cp account$i keystore/
+  yes "test" | head -n 2 | gwemix wemix new-account --out keystore/account$i
   
   if [ -f "nodekey$i" ]; then
     rm nodekey$i
   fi
-  gwemix wemix new-nodekey --out nodekey$i
-
-  cp nodekey$i nodekey/
+  gwemix wemix new-nodekey --out nodekey/nodekey$i
 
   ids=$(gwemix wemix nodeid nodekey$i)
   idv5=$(echo "$ids" | awk '/idv5:/ {print $2}')
@@ -94,3 +96,6 @@ done
 # 수정된 내용을 파일에 저장
 echo "$json_content" >"$OUTPUT_CONFIG_FILE"
 echo "Updated config saved to $OUTPUT_CONFIG_FILE"
+
+# BRANCH와 REPO 정보를 입력으로 받아 gen-docker-compose.sh 실행
+./gen-docker-compose.sh -a "$ACCOUNT_NUM" -b "$BRANCH" -r "$REPO"
