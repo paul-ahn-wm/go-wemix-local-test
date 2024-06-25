@@ -63,7 +63,6 @@ RUN apt-get install -y --no-install-recommends \
     libc-dev \
     ca-certificates \
     bash \
-    netcat-traditional \
     jq \
     wget && \
     update-ca-certificates && \

@@ -31,12 +31,11 @@ endif
 
 gwemix.tar.gz: gwemix logrot
 	@[ -d build/conf ] || mkdir -p build/conf
-	@cp -p wemix/scripts/gwemix.sh wemix/scripts/solc.sh wemix/scripts/solc.sh wemix/scripts/gwemix-local.sh wemix/scripts/local-test.sh build/bin/
+	@cp -p wemix/scripts/gwemix.sh wemix/scripts/solc.sh wemix/scripts/solc.sh build/bin/
 	@cp -p wemix/scripts/config.json.example		\
 		wemix/scripts/genesis-template.json		\
 		wemix/contracts/WemixGovernance.js	\
 		wemix/scripts/deploy-governance.js		\
-		wemix/scripts/deploy-governance-local.js		\
 		build/conf/
 	@(cd build; tar cfz gwemix.tar.gz bin conf)
 	@echo "Done building build/gwemix.tar.gz"

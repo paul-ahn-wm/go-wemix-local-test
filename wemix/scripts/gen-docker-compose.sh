@@ -63,7 +63,7 @@ cat <<EOF > "$output_file"
 services:
 EOF
 
-for ((i=1; i<=$account_num; i++)); do
+for ((i=1; i<=account_num; i++)); do
     if [ $i -eq 1 ]; then
         cat <<EOF >> "$output_file"
   wemix-boot:
@@ -73,7 +73,7 @@ for ((i=1; i<=$account_num; i++)); do
       args:
         REPO: $repo_url
         BRANCH: $branch_name
-        NODE_NUM: 1
+        NODE_NUM: $i
     image: wemix/node-boot:latest
     hostname: wemix-boot
     networks:
@@ -89,25 +89,25 @@ for ((i=1; i<=$account_num; i++)); do
 EOF
     else
         cat <<EOF >> "$output_file"
-  wemix-node$i:
+  wemix-node$((i-1)):
     build:
       context: .
       dockerfile: Dockerfile.local.node
       args:
         REPO: $repo_url
         BRANCH: $branch_name
-        NODE_NUM: $((i+1))
+        NODE_NUM: $i
     image: wemix/node:latest
-    hostname: wemix-node$i
+    hostname: wemix-node$((i-1))
     networks:
       wemix-dev-bridge:
-        ipv4_address: 172.16.237.$((i+11))
+        ipv4_address: 172.16.237.$((i+10))
     restart: unless-stopped
     tty: true
     depends_on:
       wemix1-dev:
         condition: service_started
-    container_name: wemix-node$i
+    container_name: wemix-node$((i-1))
 EOF
     fi
 done
